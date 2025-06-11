@@ -1,0 +1,25 @@
+.custom-file-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  .upload-btn {
+    padding: 0.6rem 1.2rem;
+    background-color: #007acc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #005fa3;
+    }
+  }
+
+  .file-name {
+    font-size: 0.9rem;
+    color: #666;
+  }
+}
