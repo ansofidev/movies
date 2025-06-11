@@ -1,6 +1,12 @@
+import MovieList from '../components/MovieList/MovieList';
+import MovieImportForm from '../features/movies/MovieImportForm';
 
-const HomePage = () => {
-  return <div>Welcome to Movies App</div>;
-};
-
-export default HomePage;
+export default function HomePage() {
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>Movie Library</h1>
+      <MovieImportForm />
+      <MovieList />
+    </div>
+  );
+}
