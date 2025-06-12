@@ -16,14 +16,12 @@ const initialState: MoviesState = {
   error: null,
 };
 
-// 🔹 GET /movies
 export const fetchMovies = createAsyncThunk('movies/fetchMovies', async () => {
   const response = await axios.get('/movies');
   console.log('📦 API response:', response.data);
   return response.data.data;
 });
 
-// 🔹 POST /movies
 export const createMovie = createAsyncThunk('movies/createMovie', async (movie: Movie) => {
   const response = await axios.post<Movie>('/movies', movie);
   return response.data;
