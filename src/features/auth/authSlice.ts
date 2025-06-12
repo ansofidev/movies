@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosInstance from '../../api/axios';
+import type { RootState } from '../../app/store';
 
 interface AuthState {
   token: string | null;
@@ -22,14 +23,10 @@ export const login = createAsyncThunk<
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      console.log('Sending login request with:', credentials);
-
       const response = await axiosInstance.post('/sessions', {
         email: credentials.email,
         password: credentials.password,
       });
-
-      console.log('LOGIN RESPONSE:', response.data);
 
       if (response.data.status === 0) {
         const message =
@@ -75,7 +72,6 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        console.log('login fulfilled payload:', action.payload);
         state.loading = false;
         state.token = action.payload;
         localStorage.setItem('token', action.payload);
@@ -88,4 +84,5 @@ const authSlice = createSlice({
 });
 
 export const { logout, setToken } = authSlice.actions;
+export const selectAuth = (state: RootState) => state.auth;
 export default authSlice.reducer;

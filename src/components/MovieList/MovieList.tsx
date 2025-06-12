@@ -7,7 +7,6 @@ import './MovieList.scss';
 export default function MovieList() {
   const dispatch = useDispatch<AppDispatch>();
   const { movies, loading, error } = useSelector((state: RootState) => state.movies);
-  console.log('🎬 movies:', movies);
 
   useEffect(() => {
     dispatch(fetchMovies());
@@ -23,7 +22,7 @@ export default function MovieList() {
           movies
             .filter((m) => m.title && m.year)
             .map((m) => (
-              <li key={m.id ?? `${m.title}-${m.year}`}>
+              <li key={`${m.id}-${m.title}`}>
                 {m.title} ({m.year})
               </li>
             ))

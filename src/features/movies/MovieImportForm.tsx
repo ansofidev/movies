@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../app/store';
-import { createMovie } from './moviesSlice';
+import { createMovie, fetchMovies } from './moviesSlice';
 import type { Movie } from '../types';
 import CustomFileInput from '../../components/CustomFileInput/CustomFileInput';
 import './MovieImportForm.scss';
@@ -14,7 +14,9 @@ const parseMoviesFile = (text: string): Movie[] => {
       const lines = block.trim().split('\n');
 
       const getLineValue = (key: string) =>
-        lines.find((line) => line.startsWith(`${key}:`))?.split(': ')[1]?.trim();
+        lines.find((line) => line.startsWith(`${key}:`))
+          ?.replace(`${key}:`, '')
+          .trim();
 
       const title = getLineValue('Title');
       const yearStr = getLineValue('Release Year');
@@ -44,15 +46,21 @@ export default function MovieImportForm() {
     const text = await file.text();
     const movies = parseMoviesFile(text);
 
-    console.log('Parsed movies:', movies); // для дебага
+    let createdCount = 0;
+    let skippedCount = 0;
 
     for (const movie of movies) {
-      try {
-        await dispatch(createMovie(movie));
-      } catch (err) {
-        console.error('Error uploading movie:', movie, err);
+      const action = await dispatch(createMovie(movie));
+      if (createMovie.fulfilled.match(action)) {
+        createdCount++;
+      } else if (createMovie.rejected.match(action)) {
+        skippedCount++;
+        console.warn('Skipped (probably duplicate):', movie.title);
       }
     }
+
+    await dispatch(fetchMovies());
+    console.log(`Імпорт завершено. Нових: ${createdCount}, Пропущено: ${skippedCount}`);
   };
 
   return (

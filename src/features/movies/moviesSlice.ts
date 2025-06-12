@@ -1,46 +1,43 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { Movie } from '../types';
-import axios from '../../api/axios'
+import axios from '../../api/axios';
 
 interface MoviesState {
   movies: Movie[];
-  selectedMovie: Movie | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: MoviesState = {
   movies: [],
-  selectedMovie: null,
   loading: false,
   error: null,
 };
 
 export const fetchMovies = createAsyncThunk('movies/fetchMovies', async () => {
-  const response = await axios.get('/movies');
-  console.log('📦 API response:', response.data);
+  const response = await axios.get('/movies?limit=1000'); // 👈 Додано limit
+  console.log('API response:', response.data);
   return response.data.data;
 });
 
-export const createMovie = createAsyncThunk('movies/createMovie', async (movie: Movie) => {
-  const response = await axios.post<Movie>('/movies', movie);
-  return response.data;
-});
+export const createMovie = createAsyncThunk(
+  'movies/createMovie',
+  async (movie: Movie, { rejectWithValue }) => {
+    const response = await axios.post('/movies', movie);
+    console.log('createMovie response:', response.data);
+
+    if (response.data.status !== 1) {
+      return rejectWithValue(response.data.error);
+    }
+
+    return response.data.data;
+  }
+);
 
 const moviesSlice = createSlice({
   name: 'movies',
   initialState,
-  reducers: {
-    setMovies: (state, action) => {
-      state.movies = action.payload;
-    },
-    setSelectedMovie: (state, action) => {
-      state.selectedMovie = action.payload;
-    },
-    clearSelectedMovie: (state) => {
-      state.selectedMovie = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchMovies.pending, (state) => {
@@ -55,12 +52,15 @@ const moviesSlice = createSlice({
         state.loading = false;
         state.error = action.error.message ?? 'Failed to fetch movies';
       })
-
       .addCase(createMovie.fulfilled, (state, action) => {
-        state.movies = [...state.movies, action.payload];
+        if (action.payload?.title) {
+          state.movies.push(action.payload);
+        }
+      })
+      .addCase(createMovie.rejected, (_state, action) => {
+        console.warn('Failed to create movie:', action.payload);
       });
   },
 });
 
-export const { setMovies, setSelectedMovie, clearSelectedMovie } = moviesSlice.actions;
 export default moviesSlice.reducer;
