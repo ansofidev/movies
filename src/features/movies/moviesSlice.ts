@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { Movie } from '../types';
 import axios from '../../api/axios';
+import { AxiosError } from 'axios';
 
 interface MoviesState {
   movies: Movie[];
@@ -23,14 +24,31 @@ export const fetchMovies = createAsyncThunk('movies/fetchMovies', async () => {
 export const createMovie = createAsyncThunk(
   'movies/createMovie',
   async (movie: Movie, { rejectWithValue }) => {
-    const response = await axios.post('/movies', movie);
-    console.log('createMovie response:', response.data);
+    try {
+      const newMovie = {
+        title: movie.title,
+        year: movie.year,
+        format: movie.format,
+        actors: movie.actors,
+      };
 
-    if (response.data.status !== 1) {
-      return rejectWithValue(response.data.error);
+      const response = await axios.post('/movies', newMovie);
+      console.log('createMovie response:', response.data);
+
+      if (response.data.status !== 1) {
+        return rejectWithValue(response.data.error);
+      }
+
+      return response.data.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.error('Failed to create movie:', error.response?.data || error.message);
+        return rejectWithValue(error.response?.data || 'Unexpected Axios error');
+      }
+
+      console.error('Unknown error:', error);
+      return rejectWithValue('Unexpected error');
     }
-
-    return response.data.data;
   }
 );
 
