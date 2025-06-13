@@ -16,8 +16,7 @@ const initialState: MoviesState = {
 };
 
 export const fetchMovies = createAsyncThunk('movies/fetchMovies', async () => {
-  const response = await axios.get('/movies?limit=1000'); // 👈 Додано limit
-  console.log('API response:', response.data);
+  const response = await axios.get('/movies?limit=1000');
   return response.data.data;
 });
 
@@ -33,7 +32,6 @@ export const createMovie = createAsyncThunk(
       };
 
       const response = await axios.post('/movies', newMovie);
-      console.log('createMovie response:', response.data);
 
       if (response.data.status !== 1) {
         return rejectWithValue(response.data.error);
@@ -41,13 +39,9 @@ export const createMovie = createAsyncThunk(
 
       return response.data.data;
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.error('Failed to create movie:', error.response?.data || error.message);
-        return rejectWithValue(error.response?.data || 'Unexpected Axios error');
-      }
-
-      console.error('Unknown error:', error);
-      return rejectWithValue('Unexpected error');
+      const axiosError = error as AxiosError;
+      const errorMessage = axiosError.response?.data || axiosError.message || 'Unexpected error';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -75,8 +69,8 @@ const moviesSlice = createSlice({
           state.movies.push(action.payload);
         }
       })
-      .addCase(createMovie.rejected, (_state, action) => {
-        console.warn('Failed to create movie:', action.payload);
+      .addCase(createMovie.rejected, (state, action) => {
+        state.error = typeof action.payload === 'string' ? action.payload : 'Failed to create movie';
       });
   },
 });

@@ -25,7 +25,7 @@ function AppRoutes() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/login" element={<LoginForm />} />
         <Route
-          path="/movie/:id"
+          path="/movies/:id"
           element={
             <PrivateRoute>
               <MoviePage />

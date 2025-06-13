@@ -5,6 +5,12 @@ export interface Movie {
   title: string;
   year: number;
   format: MovieFormat;
-  actors: string[];
+  actors: (string | Actor)[];
 }
 
+export interface Actor {
+  id: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}

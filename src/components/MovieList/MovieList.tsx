@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchMovies } from '../../features/movies/moviesSlice';
 import type { RootState, AppDispatch } from '../../app/store';
-import AddMovieForm from '../../features/movies/AddMovieForm/AddMovieForm';
+import AddMovieModal from '../AddMovieModal/AddMovieModal';
 import './MovieList.scss';
 
 export default function MovieList() {
@@ -31,7 +32,9 @@ export default function MovieList() {
             .filter((m) => m.title && m.year)
             .map((m) => (
               <li key={m.id ?? `${m.title}-${m.year}`}>
-                {m.title} ({m.year})
+                <Link to={`/movies/${m.id}`}>
+                  {m.title} ({m.year})
+                </Link>
               </li>
             ))
         ) : (
@@ -39,14 +42,7 @@ export default function MovieList() {
         )}
       </ul>
 
-      {showModal && (
-        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-button" onClick={() => setShowModal(false)}>✖</button>
-            <AddMovieForm />
-          </div>
-        </div>
-      )}
+      {showModal && <AddMovieModal onClose={() => setShowModal(false)} />}
     </div>
   );
 }
