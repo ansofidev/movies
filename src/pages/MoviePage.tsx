@@ -1,39 +1,59 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from '../api/axios';
-import type { Movie, Actor } from '../features/types';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMovieDetails } from '../features/movies/moviesSlice';
+import type { RootState, AppDispatch } from '../app/store';
 import '../styles/MoviePage.scss';
 
 const MoviePage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<Record<string, string | undefined>>();
+  const movieId = id ? parseInt(id, 10) : null;
+
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const [movie, setMovie] = useState<Movie | null>(null);
+  const movie = useSelector((state: RootState) =>
+    state.movies.movies.find(m => m.id === movieId)
+  );
+
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    const loadMovieDetails = async () => {
+      if (!movieId) return;
 
-    const fetchMovie = async () => {
-      try {
-        const response = await axios.get(`/movies/${id}`);
-        setMovie(response.data.data);
-      } catch {
-        setMovie(null);
-      } finally {
+      if (!movie || !movie.actors || movie.actors.length === 0) {
+        setLoading(true);
+        setError(null);
+        try {
+          await dispatch(fetchMovieDetails(movieId)).unwrap();
+        } catch (err) {
+          if (typeof err === 'string') {
+            setError(err);
+          } else if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError('Failed to load movie details');
+          }
+        } finally {
+          setLoading(false);
+        }
+      } else {
         setLoading(false);
       }
     };
 
-    fetchMovie();
-  }, [id]);
+    loadMovieDetails();
+  }, [dispatch, movieId, movie]);
 
   if (loading) return <p>Loading movie data...</p>;
+  if (error) return <p>Error: {error}</p>;
   if (!movie) return <p>Movie not found.</p>;
 
   const actorsList = Array.isArray(movie.actors)
     ? movie.actors.map(actor =>
-        typeof actor === 'string' ? actor : (actor as Actor).name
+        typeof actor === 'string' ? actor : actor.name
       )
     : [];
 

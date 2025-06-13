@@ -1,0 +1,31 @@
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #213547;
+  }
+
+  .mode-toggle {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #2b72ee;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #1f5edb;
+    }
+  }
+}

@@ -1,13 +1,22 @@
 import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '../../app/store';
-import { createMovie, fetchMovies } from './moviesSlice';
-import type { Movie } from '../types';
+import { store, type AppDispatch } from '../../app/store';
+import {
+  createMovie,
+  fetchMissingMovieDetails,
+  fetchMovieDetails,
+} from './moviesSlice';
+import type { Movie, Actor, MovieFormat } from '../types';
 import CustomFileInput from '../../components/CustomFileInput/CustomFileInput';
 import './MovieImportForm.scss';
 
+function isMovie(m: Movie | null): m is Movie {
+  return m !== null;
+}
+
+const allowedFormats: MovieFormat[] = ['VHS', 'DVD', 'Blu-ray'];
+
 const parseMoviesFile = (text: string): Movie[] => {
   const blocks = text.trim().split(/\n\s*\n/);
-  const allowedFormats: Movie['format'][] = ['VHS', 'DVD', 'Blu-ray'];
 
   return blocks
     .map((block) => {
@@ -28,15 +37,17 @@ const parseMoviesFile = (text: string): Movie[] => {
       const year = Number(yearStr);
       if (isNaN(year)) return null;
 
-      const format = allowedFormats.includes(formatStr as Movie['format'])
-        ? (formatStr as Movie['format'])
+      const format = allowedFormats.includes(formatStr as MovieFormat)
+        ? (formatStr as MovieFormat)
         : 'DVD';
 
-      const actors = starsLine.split(',').map((s) => s.trim());
+      const actors: (string | Actor)[] = starsLine
+        .split(',')
+        .map((s) => s.trim());
 
       return { title, year, format, actors };
     })
-    .filter((m): m is Movie => m !== null);
+    .filter(isMovie);
 };
 
 export default function MovieImportForm() {
@@ -51,16 +62,21 @@ export default function MovieImportForm() {
 
     for (const movie of movies) {
       const action = await dispatch(createMovie(movie));
+
       if (createMovie.fulfilled.match(action)) {
         createdCount++;
+        const createdMovie = action.payload;
+        if (createdMovie?.id) {
+          await dispatch(fetchMovieDetails(createdMovie.id));
+        }
       } else if (createMovie.rejected.match(action)) {
         skippedCount++;
-        console.warn('Skipped (probably duplicate):', movie.title);
       }
     }
 
-    await dispatch(fetchMovies());
-    console.log(`Імпорт завершено. Нових: ${createdCount}, Пропущено: ${skippedCount}`);
+    await dispatch(fetchMissingMovieDetails(store.getState().movies.movies));
+
+    console.log(`Created: ${createdCount}, Skipped: ${skippedCount}`);
   };
 
   return (
