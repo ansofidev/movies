@@ -32,12 +32,28 @@ export const createMovie = createAsyncThunk(
       };
 
       const response = await axios.post('/movies', newMovie);
-
       if (response.data.status !== 1) {
         return rejectWithValue(response.data.error);
       }
 
       return response.data.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage = axiosError.response?.data || axiosError.message || 'Unexpected error';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const deleteMovie = createAsyncThunk(
+  'movies/deleteMovie',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`/movies/${id}`);
+      if (response.data.status !== 1) {
+        return rejectWithValue(response.data.error);
+      }
+      return id;
     } catch (error) {
       const axiosError = error as AxiosError;
       const errorMessage = axiosError.response?.data || axiosError.message || 'Unexpected error';
@@ -71,6 +87,12 @@ const moviesSlice = createSlice({
       })
       .addCase(createMovie.rejected, (state, action) => {
         state.error = typeof action.payload === 'string' ? action.payload : 'Failed to create movie';
+      })
+      .addCase(deleteMovie.fulfilled, (state, action) => {
+        state.movies = state.movies.filter((movie) => movie.id !== action.payload);
+      })
+      .addCase(deleteMovie.rejected, (state, action) => {
+        state.error = typeof action.payload === 'string' ? action.payload : 'Failed to delete movie';
       });
   },
 });

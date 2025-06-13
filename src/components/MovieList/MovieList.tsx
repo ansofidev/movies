@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchMovies } from '../../features/movies/moviesSlice';
+import { fetchMovies, deleteMovie } from '../../features/movies/moviesSlice';
 import type { RootState, AppDispatch } from '../../app/store';
 import AddMovieModal from '../AddMovieModal/AddMovieModal';
 import './MovieList.scss';
@@ -15,6 +15,13 @@ export default function MovieList() {
     dispatch(fetchMovies());
   }, [dispatch]);
 
+  const handleDelete = (id?: number) => {
+    if (!id) return;
+    if (confirm('Are you sure you want to delete this movie?')) {
+      dispatch(deleteMovie(id));
+    }
+  };
+
   return (
     <div className="movie-list-container">
       <div className="movie-list-header">
@@ -26,6 +33,7 @@ export default function MovieList() {
 
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
+
       <ul>
         {Array.isArray(movies) && movies.length > 0 ? (
           movies
@@ -35,6 +43,13 @@ export default function MovieList() {
                 <Link to={`/movies/${m.id}`}>
                   {m.title} ({m.year})
                 </Link>
+                <button
+                  onClick={() => handleDelete(m.id)}
+                  className="delete-button"
+                  title="Delete movie"
+                >
+                  🗑️
+                </button>
               </li>
             ))
         ) : (
