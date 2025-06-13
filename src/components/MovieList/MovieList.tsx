@@ -10,6 +10,7 @@ export default function MovieList() {
   const dispatch = useDispatch<AppDispatch>();
   const { movies, loading, error } = useSelector((state: RootState) => state.movies);
   const [showModal, setShowModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     dispatch(fetchMovies());
@@ -22,36 +23,49 @@ export default function MovieList() {
     }
   };
 
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
+
+  const sortedMovies = [...movies].sort((a, b) => {
+    const titleA = a.title.toLowerCase();
+    const titleB = b.title.toLowerCase();
+    return sortOrder === 'asc' ? titleA.localeCompare(titleB) : titleB.localeCompare(titleA);
+  });
+
   return (
     <div className="movie-list-container">
       <div className="movie-list-header">
         <h2>Movies</h2>
-        <button onClick={() => setShowModal(true)} className="add-button">
-          ➕ Add Movie
-        </button>
+        <div className="movie-controls">
+          <button onClick={toggleSortOrder} className="sort-button" title="Toggle sort order">
+            {sortOrder === 'asc' ? '🔼 A → Z' : '🔽 Z → A'}
+          </button>
+          <button onClick={() => setShowModal(true)} className="add-button">
+            ➕ Add Movie
+          </button>
+        </div>
       </div>
 
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
 
       <ul>
-        {Array.isArray(movies) && movies.length > 0 ? (
-          movies
-            .filter((m) => m.title && m.year)
-            .map((m) => (
-              <li key={m.id ?? `${m.title}-${m.year}`}>
-                <Link to={`/movies/${m.id}`}>
-                  {m.title} ({m.year})
-                </Link>
-                <button
-                  onClick={() => handleDelete(m.id)}
-                  className="delete-button"
-                  title="Delete movie"
-                >
-                  🗑️
-                </button>
-              </li>
-            ))
+        {sortedMovies.length > 0 ? (
+          sortedMovies.map((m) => (
+            <li key={m.id ?? `${m.title}-${m.year}`}>
+              <Link to={`/movies/${m.id}`}>
+                {m.title} ({m.year})
+              </Link>
+              <button
+                onClick={() => handleDelete(m.id)}
+                className="delete-button"
+                title="Delete movie"
+              >
+                🗑️
+              </button>
+            </li>
+          ))
         ) : (
           <li>No valid movies data</li>
         )}
