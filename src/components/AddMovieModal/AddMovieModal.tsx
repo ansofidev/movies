@@ -10,7 +10,7 @@ export default function AddMovieModal({ onClose }: AddMovieModalProps) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-button" onClick={onClose}>✖</button>
-        <AddMovieForm />
+        <AddMovieForm onClose={onClose} />
       </div>
     </div>
   );

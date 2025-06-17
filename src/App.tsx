@@ -1,4 +1,7 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import HomePage from './pages/HomePage';
 import Header from './components/Header/Header';
 import LoginForm from './features/auth/LoginForm';
@@ -8,7 +11,9 @@ import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 
 function AppRoutes() {
   const location = useLocation();
-  const hideHeader = ['/login', '/register'].some(path => location.pathname.startsWith(path));
+  const hideHeader = ['/login', '/register'].some(path =>
+    location.pathname.startsWith(path)
+  );
 
   return (
     <>
@@ -41,6 +46,17 @@ export default function App() {
   return (
     <HashRouter>
       <AppRoutes />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </HashRouter>
   );
 }

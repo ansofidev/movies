@@ -1,44 +1,78 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../../app/store';
+import type { MovieFormat } from '../../types';
 import { createMovie, fetchMovies } from '../moviesSlice';
+import { toast } from 'react-toastify';
 import './AddMovieForm.scss';
 
-export default function AddMovieForm() {
+interface AddMovieFormProps {
+  onClose: () => void;
+}
+
+export default function AddMovieForm({ onClose }: AddMovieFormProps) {
   const dispatch = useDispatch<AppDispatch>();
 
   const [title, setTitle] = useState('');
   const [year, setYear] = useState('');
-  const [format, setFormat] = useState('DVD');
+  const [format, setFormat] = useState<MovieFormat>('DVD');
   const [actors, setActors] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const validateFields = (): boolean => {
+    if (!title.trim()) {
+      setErrorMessage('Please enter a valid movie title.');
+      return false;
+    }
+
+    const numericYear = Number(year);
+    if (!year || isNaN(numericYear) || numericYear < 1900 || numericYear > 2021) {
+      setErrorMessage('Please enter a valid release year (1900–2021).');
+      return false;
+    }
+
+    if (!actors.trim()) {
+      setErrorMessage('Please add at least one actor (comma-separated).');
+      return false;
+    }
+
+    setErrorMessage('');
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !year || !format || !actors) {
-      setMessage('❗ Please fill in all fields');
-      return;
-    }
+    if (!validateFields()) return;
 
     const movie = {
       title: title.trim(),
       year: Number(year),
-      format: format as 'VHS' | 'DVD' | 'Blu-ray',
-      actors: actors.split(',').map((a) => a.trim()),
+      format,
+      actors: actors
+        .split(',')
+        .map((a) => a.trim())
+        .filter(Boolean),
     };
 
     const result = await dispatch(createMovie(movie));
 
     if (createMovie.fulfilled.match(result)) {
-      setMessage('✅ Movie added successfully');
+      toast.success('🎉 Movie added successfully!');
       setTitle('');
       setYear('');
       setFormat('DVD');
       setActors('');
+      setErrorMessage('');
       dispatch(fetchMovies());
+      onClose();
     } else {
-      setMessage(`⚠️ Failed to add movie: ${result.payload}`);
+      const errorText =
+        typeof result.payload === 'string'
+          ? result.payload
+          : 'An unexpected error occurred while adding the movie.';
+      setErrorMessage(errorText);
+      toast.error(`❌ ${errorText}`);
     }
   };
 
@@ -55,12 +89,12 @@ export default function AddMovieForm() {
 
         <input
           type="number"
-          placeholder="Release Year"
+          placeholder="Release Year (e.g. 1999)"
           value={year}
           onChange={(e) => setYear(e.target.value)}
         />
 
-        <select value={format} onChange={(e) => setFormat(e.target.value)}>
+        <select value={format} onChange={(e) => setFormat(e.target.value as MovieFormat)}>
           <option value="VHS">VHS</option>
           <option value="DVD">DVD</option>
           <option value="Blu-ray">Blu-ray</option>
@@ -76,7 +110,7 @@ export default function AddMovieForm() {
         <button type="submit">Add Movie</button>
       </form>
 
-      {message && <p className="message">{message}</p>}
+      {errorMessage && <p className="form-error">{errorMessage}</p>}
     </div>
   );
 }
