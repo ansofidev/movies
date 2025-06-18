@@ -56,12 +56,6 @@ Configure the API URL if different from default:
 VITE_API_URL=http://localhost:8000/api/v1
 ```
 
-Optionally, include a JWT token:
-
-```dotenv
-VITE_API_TOKEN=your_jwt_token_here
-```
-
 ### 3. Run the app
 
 ```bash
