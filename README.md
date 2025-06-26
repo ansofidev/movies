@@ -1,7 +1,6 @@
-# 🎥 WebbyLab Movies Frontend
+# 🎥 Movies Frontend
 
 This is a single-page React application for managing a movie collection.
-It was built as part of a WebbyLab test task.
 
 ---
 
@@ -12,7 +11,7 @@ It was built as part of a WebbyLab test task.
 * Axios
 * SCSS / CSS Modules
 * Vite (for development/build tooling)
-* API: [WebbyLab Movies Backend](https://hub.docker.com/r/webbylabhub/movies)
+* API: [Movies Backend (Docker Image)](https://hub.docker.com/r/webbylabhub/movies)
 
 ---
 
@@ -32,8 +31,8 @@ It was built as part of a WebbyLab test task.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/webbylab-movies.git
-cd webbylab-movies
+git clone https://github.com/yourusername/movies.git
+cd movies
 ```
 
 ### 2. Install dependencies
@@ -50,10 +49,10 @@ Create a `.env` file in the root directory and copy from `.env.example`:
 cp .env.example .env
 ```
 
-Configure the API URL if different from default:
+Configure the API URL:
 
 ```dotenv
-VITE_API_URL=http://localhost:8000/api/v1
+VITE_API_URL=https://movies-api-4e4k.onrender.com/api/v1
 ```
 
 ### 3. Run the app
@@ -64,7 +63,7 @@ npm run dev
 
 Your app will be available at:
 📍 Frontend: [http://localhost:5173/movies](http://localhost:5173/movies)
-📍 Backend (API): [http://localhost:8000](http://localhost:8000)
+📍 Backend (API): [https://movies-api-4e4k.onrender.com](https://movies-api-4e4k.onrender.com)
 
 ---
 
@@ -73,7 +72,7 @@ Your app will be available at:
 All API requests require a JWT token. Get one using:
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/sessions \
+curl -X POST https://movies-api-4e4k.onrender.com/api/v1/sessions \
   -H 'Content-Type: application/json' \
   -d '{"email": "your@email.com", "password": "your-password"}'
 ```
@@ -103,7 +102,7 @@ Stars: Actor One, Actor Two
 
 * API Docker: [https://hub.docker.com/r/webbylabhub/movies](https://hub.docker.com/r/webbylabhub/movies)
 * API Docs: [https://documenter.getpostman.com/view/356840/TzkyLeVK](https://documenter.getpostman.com/view/356840/TzkyLeVK)
-* GitHub (Frontend): [https://github.com/yourusername/webbylab-movies](https://github.com/yourusername/webbylab-movies)
+* GitHub (Frontend): [https://github.com/yourusername/movies](https://github.com/yourusername/movies)
 
 ---
 
@@ -114,7 +113,5 @@ There are no automated tests yet. The component structure allows easy extension 
 ---
 
 ## 📧 Contact
-
-This project was created as part of a technical task for WebbyLab.
 
 > Contact: [ansophidev@gmail.com](mailto:ansophidev@gmail.com)
